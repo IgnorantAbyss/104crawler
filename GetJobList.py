@@ -3,14 +3,28 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 import time
 
-driver = webdriver.Chrome()  # 或根據您的瀏覽器選擇其他WebDriver
+# def get_job_info(driver, url):
+#     driver.get(url) # 打開職缺資訊頁面
+#     wait = WebDriverWait(driver, 5)
 
-url = 'https://www.104.com.tw/jobs/search/?jobsource=index_s&keyword=AI&mode=s&page=1'
+#     company_name = driver.find_element(By.CSS_SELECTOR, "选择器").text
+#     job_category = driver.find_element(By.CSS_SELECTOR, "选择器").text
+#     salary = driver.find_element(By.CSS_SELECTOR, "选择器").text
+#     work_location = driver.find_element(By.CSS_SELECTOR, "选择器").text
+#     job_content = driver.find_element(By.CSS_SELECTOR, "选择器").text
+#     qualification = driver.find_element(By.CSS_SELECTOR, "选择器").text
 
-# 設定滾動次數，根據需要加載的內容多少來調整
-pages = 3
+#     job_info = {
+#         "公司名稱",
+#         "職務類別",
+#         "工作待遇",
+#         "上班地點",
+#         "工作內容",
+#         "條件要求"
+#         }
 
-def GetJobList(url, pages):
+def get_job_list(driver, url, pages):
+
     driver.get(url)  # 打開職缺列表頁面
 
     # 等待初次頁面加載完畢
@@ -29,15 +43,21 @@ def GetJobList(url, pages):
         # 檢查職缺元素內的<b-tit__date>是否包含特定的SVG圖標
         ad_icons = job_element.find_elements(By.CSS_SELECTOR, 'span.b-tit__date svg')
         
-        # 如果沒有找到SVG圖標，表示這是一個普通職缺
+        # 如果沒有找到SVG圖標，表示非廣告職缺
         if len(ad_icons) == 0:
             job_title = job_element.find_element(By.CSS_SELECTOR, 'a.js-job-link').text
             job_link = job_element.find_element(By.CSS_SELECTOR, 'a.js-job-link').get_attribute('href')
             JobList.append({"職缺名稱": job_title, "職缺URL": job_link})  # 添加一條職缺資訊到列表中
+            # JobList.append(job_link)
+    
+    driver.quit()
 
     return JobList
 
 if __name__ == "__main__":
-     JobList = GetJobList(url=url, pages=pages)
-     for job in JobList:
-         print(job)
+    driver = webdriver.Chrome()  # 根據您的瀏覽器選擇WebDriver
+    url = 'https://www.104.com.tw/jobs/search/?jobsource=index_s&keyword=AI&mode=s&page=1'
+    job_list = get_job_list(driver, url, pages=3)
+    for job in job_list:
+        print(job)
+    # driver.quit()  # 關閉WebDriver
