@@ -60,4 +60,3 @@ if __name__ == "__main__":
     job_list = get_job_list(driver, url, pages=3)
     for job in job_list:
         print(job)
-    # driver.quit()  # 關閉WebDriver
