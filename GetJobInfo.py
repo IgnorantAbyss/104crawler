@@ -9,7 +9,9 @@ from GetJobList import get_job_list
 
 def get_job_info(driver, job_list):
 
+    job_topic = [job["職缺標題"] for job in job_list]
     links = [job["職缺URL"] for job in job_list]
+
     job_info = []
 
     for i in range(len(links)):
@@ -93,6 +95,7 @@ def get_job_info(driver, job_list):
                 other_requirements = "沒有找到相關的其他條件。"
 
             job_info_dict = {
+                "職缺標題" : job_topic[i],
                 "公司名稱" : company_name,
                 "職務類別" : job_titles,
                 "工作待遇" : salary_info,
@@ -101,7 +104,8 @@ def get_job_info(driver, job_list):
                 "語文條件" : language_requirements,
                 "擅長工具要求" : tools_requirements,
                 "工作技能" : skill_requirements,
-                "其他條件" : other_requirements
+                "其他條件" : other_requirements,
+                "職缺網址" : links[i]
                 }
             
             job_info.append(job_info_dict)
@@ -120,16 +124,19 @@ def get_job_info(driver, job_list):
     job_info_df = pd.DataFrame(job_info)
     return job_info_df
 
-if __name__ == "__main__":
+if __name__ == "__main__": 
+    # 設定driver
     options = Options()
     options.add_argument("--headless")
     options.add_argument("--disable-gpu")
     driver = webdriver.Chrome(options=options)# 使用無頭模式
     driver.set_window_size(1920, 1080) # 設置窗口大小為1920x1080
+    # 設定關鍵字
+    keyword = 'AI'
+    # 設定搜尋頁數
+    pages = 0
 
-    url = 'https://www.104.com.tw/jobs/search/?jobsource=index_s&keyword=AI&mode=s&page=1'
-
-    job_list = get_job_list(driver, url, pages=0)
+    job_list = get_job_list(driver, keyword, pages)
     for job in job_list:
         print(job)
 
@@ -138,4 +145,11 @@ if __name__ == "__main__":
     job_info_df = get_job_info(job_list=job_list, driver=driver)
 
     print(job_info_df)
+
+    import csv
+    with open('output.csv', 'w', newline='', encoding='utf-8-sig') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(job_info_df.columns)
+        writer.writerows(job_info_df.values)
+
 
