@@ -38,11 +38,14 @@ location_dict = {
 keyword = '數據工程師'
 
 # 設定搜尋頁數
-custom_pages = 1
+# custom_pages = 1
 
-for location, code in location_dict.items():
-    job_list = GetJobList.get_job_list(keyword, location=location, custom_pages=custom_pages)
-    # job_list = GetJobList.get_job_list(keyword, location=location)
+# 設定搜尋工作地點
+locations = ['台北市', '台北市', '新北市', '宜蘭縣', '基隆市', '桃園市', '新竹縣市', '苗栗縣', '台中市', '彰化縣', '南投縣', '雲林縣', '嘉義縣市', '台南市', '高雄市', '屏東縣', '台東縣', '花蓮縣', '澎湖縣', '金門縣', '連江縣']
+
+for location in locations:
+    # job_list = GetJobList.get_job_list(keyword, location=location, custom_pages=custom_pages)
+    job_list = GetJobList.get_job_list(keyword, location=location)
 
     job_info_df = GetJobInfo.get_job_info(job_list=job_list)
 

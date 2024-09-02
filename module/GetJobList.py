@@ -147,10 +147,10 @@ def get_job_list(keyword, location, custom_pages=False, driver=False):
 
     return job_list
 
-if __name__ == "__main__":
-    driver = webdriver.Chrome()  # 根據您的瀏覽器選擇WebDriver
-    keyword = '數據工程師'
-    # job_list = get_job_list(driver, keyword, location="台北市", custom_pages=3)
-    job_list = get_job_list(keyword, location="連江縣", driver=driver)
-    for job in job_list:
-        print(job)
+# if __name__ == "__main__":
+#     driver = webdriver.Chrome()  # 根據您的瀏覽器選擇WebDriver
+#     keyword = '數據工程師'
+#     # job_list = get_job_list(driver, keyword, location="台北市", custom_pages=3)
+#     job_list = get_job_list(keyword, location="連江縣", driver=driver)
+#     for job in job_list:
+#         print(job)
