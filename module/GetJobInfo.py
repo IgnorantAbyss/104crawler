@@ -3,16 +3,26 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import NoSuchElementException
 import pandas as pd
+import time
+import random
 
-from GetJobList import get_job_list
-
-def get_job_info(driver, job_list):
+def get_job_info(job_list, driver=False):
+    if not driver:
+        options = Options()
+        options.add_argument("--headless")
+        options.add_argument("--disable-gpu")
+        options.add_argument("--log-level=3")
+        options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+        driver = webdriver.Chrome(options=options)# 使用無頭模式
+        driver.set_window_size(1920, 1080) # 設置窗口大小為1920x1080
 
     job_topic = [job["職缺標題"] for job in job_list]
     links = [job["職缺URL"] for job in job_list]
 
     job_info = []
+    error_info = []
 
     for i in range(len(links)):
         try:
@@ -56,7 +66,10 @@ def get_job_info(driver, job_list):
             work_address = f"{address_text} {additional_info_text}".strip()
 
             # 取得工作內容
-            job_content = driver.find_element(By.CSS_SELECTOR, 'div.job-description > p.job-description__content').text
+            try:
+                job_content = driver.find_element(By.CSS_SELECTOR, 'div.job-description > p.job-description__content').text
+            except NoSuchElementException as e:
+                job_content = "無此內容"
 
             # 取得語文條件
             # 定位文本內容包含"語文條件"的<h3>元素，..向上找到父元素後選擇<div>類型的同級元素，//p選擇所有<p>子元素
@@ -108,48 +121,81 @@ def get_job_info(driver, job_list):
                 "職缺網址" : links[i]
                 }
             
+            print(job_info_dict)
             job_info.append(job_info_dict)
+
+            time.sleep(random.uniform(1, 4))
 
         
         except Exception as e:
             print(f"發生錯誤，網址：{links[i]} 錯誤信息：{e}")
+            error_info.append(f"{links[i]}，錯誤信息：{e}")
             
-            # 錯誤處理：重新打開瀏覽器窗口顯示出錯網頁
-            driver.quit()  # 首先關閉無頭模式的瀏覽器實例
-            debug_driver = webdriver.Chrome()  # 使用非無頭模式
-            debug_driver.get(links[i])  # 導航到出錯的網址
+            # # 錯誤處理：重新打開瀏覽器窗口顯示出錯網頁
+            # driver.quit()  # 首先關閉無頭模式的瀏覽器實例
+            # debug_driver = webdriver.Chrome()  # 使用非無頭模式
+            # debug_driver.get(links[i])  # 導航到出錯的網址
+
+            # options = Options()
+            # options.add_argument("--headless")
+            # options.add_argument("--disable-gpu")
+            # options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+            # driver = webdriver.Chrome(options=options)# 使用無頭模式
+            continue
             
 
     driver.quit()
     job_info_df = pd.DataFrame(job_info)
+    print(error_info)
     return job_info_df
 
-if __name__ == "__main__": 
+# if __name__ == "__main__": 
+# from GetJobList import get_job_list
+
+#     location_dict = {
+#     "台北市":6001001000,
+#     "新北市":6001002000,
+#     "宜蘭縣":6001003000,
+#     "基隆市":6001004000,
+#     "桃園市":6001005000,
+#     "新竹縣市":6001006000,
+#     "苗栗縣":6001007000,
+#     "台中市":6001008000,
+#     "彰化縣":6001010000,
+#     "南投縣":6001011000,
+#     "雲林縣":6001012000,
+#     "嘉義縣市":6001013000,
+#     "台南市":6001014000,
+#     "高雄市":6001016000,
+#     "屏東縣":6001018000,
+#     "台東縣":6001019000,
+#     "花蓮縣":6001020000,
+#     "澎湖縣":6001021000,
+#     "金門縣":6001022000,
+#     "連江縣":6001023000
+#     }
+
     # 設定driver
-    options = Options()
-    options.add_argument("--headless")
-    options.add_argument("--disable-gpu")
-    driver = webdriver.Chrome(options=options)# 使用無頭模式
-    driver.set_window_size(1920, 1080) # 設置窗口大小為1920x1080
+    # options = Options()
+    # options.add_argument("--headless")
+    # options.add_argument("--disable-gpu")
+    # options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+    # driver = webdriver.Chrome(options=options)# 使用無頭模式
+    # driver.set_window_size(1920, 1080) # 設置窗口大小為1920x1080
+
     # 設定關鍵字
-    keyword = 'AI'
-    # 設定搜尋頁數
-    pages = 0
+    # keyword = '數據工程師'
+    # # 設定搜尋頁數
+    # # custom_pages = 3
+    # for location, code in location_dict.items():
+    #     job_list = get_job_list(keyword, location=location)
+    #     # print(job_list)
 
-    job_list = get_job_list(driver, keyword, pages)
-    for job in job_list:
-        print(job)
+    #     job_info_df = get_job_info(job_list=job_list)
+    #     # # print(job_info_df)
 
-    driver = webdriver.Chrome(options=options)# 使用無頭模式
-    driver.set_window_size(1920, 1080) # 設置窗口大小為1920x1080
-    job_info_df = get_job_info(job_list=job_list, driver=driver)
-
-    print(job_info_df)
-
-    import csv
-    with open('output.csv', 'w', newline='', encoding='utf-8-sig') as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerow(job_info_df.columns)
-        writer.writerows(job_info_df.values)
-
-
+    #     import csv
+    #     with open(f'104{location} {keyword}.csv', 'w', newline='', encoding='utf-8-sig') as csvfile:
+    #         writer = csv.writer(csvfile)
+    #         writer.writerow(job_info_df.columns)
+    #         writer.writerows(job_info_df.values)
